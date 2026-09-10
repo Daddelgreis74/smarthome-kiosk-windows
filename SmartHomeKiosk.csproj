@@ -9,6 +9,7 @@
     <ApplicationIcon>app.ico</ApplicationIcon>
     <RootNamespace>SmartHomeKiosk</RootNamespace>
     <AssemblyName>SmartHomeKiosk</AssemblyName>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

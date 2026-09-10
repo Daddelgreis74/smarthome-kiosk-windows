@@ -13,10 +13,13 @@ namespace SmartHomeKiosk.Services
         {
             try
             {
-                using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, false);
-                if (key == null) return false;
-                var value = key.GetValue(AppName) as string;
-                return !string.IsNullOrEmpty(value);
+                using var cuKey = Registry.CurrentUser.OpenSubKey(RunKeyPath, false);
+                var cuValue = cuKey?.GetValue(AppName) as string;
+                if (!string.IsNullOrEmpty(cuValue)) return true;
+
+                using var lmKey = Registry.LocalMachine.OpenSubKey(RunKeyPath, false);
+                var lmValue = lmKey?.GetValue(AppName) as string;
+                return !string.IsNullOrEmpty(lmValue);
             }
             catch (Exception ex)
             {
@@ -29,20 +32,24 @@ namespace SmartHomeKiosk.Services
         {
             try
             {
-                using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, true);
-                if (key == null) return;
-
+                using var cuKey = Registry.CurrentUser.OpenSubKey(RunKeyPath, true);
                 if (enable)
                 {
                     string? exePath = Environment.ProcessPath;
-                    if (!string.IsNullOrEmpty(exePath))
+                    if (!string.IsNullOrEmpty(exePath) && cuKey != null)
                     {
-                        key.SetValue(AppName, $"\"{exePath}\"");
+                        cuKey.SetValue(AppName, $"\"{exePath}\"");
                     }
                 }
                 else
                 {
-                    key.DeleteValue(AppName, false);
+                    cuKey?.DeleteValue(AppName, false);
+                    try
+                    {
+                        using var lmKey = Registry.LocalMachine.OpenSubKey(RunKeyPath, true);
+                        lmKey?.DeleteValue(AppName, false);
+                    }
+                    catch { /* LocalMachine might require admin rights */ }
                 }
             }
             catch (Exception ex)

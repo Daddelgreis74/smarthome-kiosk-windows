@@ -1,5 +1,5 @@
 #define MyAppName "SmartHome Kiosk"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "SmartHome"
 #define MyAppExeName "SmartHomeKiosk.exe"
 
@@ -11,8 +11,8 @@ AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\SmartHomeKiosk
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequired=admin
+UsedUserAreasWarning=no
 OutputDir=..\dist
 OutputBaseFilename=SmartHomeKiosk-Setup
 SetupIconFile=app.ico
@@ -43,6 +43,7 @@ Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"; 
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\app.ico"; Tasks: desktopicon
 
 [Registry]
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "SmartHomeKiosk"; ValueData: """{app}\{#MyAppExeName}"""; Tasks: autostart; Flags: uninsdeletevalue
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "SmartHomeKiosk"; ValueData: """{app}\{#MyAppExeName}"""; Tasks: autostart; Flags: uninsdeletevalue
 
 [Run]
