@@ -1,0 +1,16 @@
+# Visual Studio / .NET build artifacts
+bin/
+obj/
+publish/
+dist/
+*.user
+*.suo
+
+# WebView2 cache & downloaded bootstrapper
+WebView2Data/
+installer/MicrosoftEdgeWebview2Setup.exe
+
+# OS artifacts
+Thumbs.db
+Desktop.ini
+

@@ -1,0 +1,54 @@
+<Window x:Class="SmartHomeKiosk.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="SmartHome Kiosk"
+        Icon="app.ico"
+        WindowStyle="None"
+        WindowState="Maximized"
+        ResizeMode="NoResize"
+        Topmost="True"
+        Background="Black"
+        PreviewMouseMove="Window_PreviewMouseMove"
+        PreviewMouseDown="Window_PreviewMouseDown"
+        PreviewTouchDown="Window_PreviewTouchDown"
+        KeyDown="Window_KeyDown">
+    <Grid Background="Black">
+        <!-- Layer 0: Der Web-Browser -->
+        <wv2:WebView2 x:Name="KioskBrowser" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+        <!-- Layer 1: Watchdog / Reconnect Overlay bei Verbindungsabbruch oder Serverstart -->
+        <Grid x:Name="WatchdogOverlay" Background="#0B0F19" Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="440">
+                <Border Width="64" Height="64" CornerRadius="32" Background="#1E293B" HorizontalAlignment="Center" Margin="0,0,0,24">
+                    <TextBlock Text="⚡" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource AccentCyan}"/>
+                </Border>
+                <TextBlock Text="Verbindung wird hergestellt..." FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <TextBlock x:Name="TxtWatchdogUrl" Text="Ziel: http://..." FontSize="13" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                
+                <ProgressBar IsIndeterminate="True" Height="4" Background="#1E293B" Foreground="{StaticResource AccentCyan}" Margin="20,0,20,24"/>
+
+                <TextBlock Text="Automatischer Wiederverbindungsversuch alle 5 Sekunden..." FontSize="12" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+
+                <Button Content="Einstellungen öffnen (Notfall)" Style="{StaticResource SecondaryButton}" HorizontalAlignment="Center" Click="BtnWatchdogSettings_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Layer 2: Geheime Touch-Ecke (Oben links, 100x100 Pixel, unsichtbar) -->
+        <Border x:Name="SecretTouchCorner" 
+                Width="100" Height="100" 
+                HorizontalAlignment="Left" VerticalAlignment="Top" 
+                Background="Transparent"
+                PreviewTouchDown="SecretCorner_PreviewTouchDown"
+                PreviewTouchUp="SecretCorner_PreviewTouchUp"
+                PreviewMouseDown="SecretCorner_PreviewMouseDown"
+                PreviewMouseUp="SecretCorner_PreviewMouseUp"/>
+
+        <!-- Layer 3: Schwarzer Vollbild-Schoner (Dimming / Software-Standby) -->
+        <Grid x:Name="ScreenSaverOverlay" Background="Black" Visibility="Collapsed"
+              PreviewMouseDown="ScreenSaver_PreviewMouseDown"
+              PreviewTouchDown="ScreenSaver_PreviewTouchDown">
+            <!-- Absolut schwarze Fläche für OLED/LCD Abschaltung und sofortiges Wake-on-Touch -->
+        </Grid>
+    </Grid>
+</Window>
