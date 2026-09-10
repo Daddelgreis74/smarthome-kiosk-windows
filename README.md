@@ -1,76 +1,81 @@
-# SmartHome Kiosk (Windows)
+﻿# SmartHome Kiosk (Windows)
 
-Eine performante, schlanke und robuste Kiosk-Anwendung für Windows auf Basis von **C# / .NET 8 WPF** und **Microsoft Edge WebView2**, konzipiert für Wand-Displays und SmartHome-Terminals (wie Neo Deck Dashboard).
+[![Release Build](https://github.com/Daddelgreis74/smarthome-kiosk-windows/actions/workflows/release.yml/badge.svg)](https://github.com/Daddelgreis74/smarthome-kiosk-windows/actions/workflows/release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Daddelgreis74/smarthome-kiosk-windows)](https://github.com/Daddelgreis74/smarthome-kiosk-windows/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-8.0-purple.svg)](https://dotnet.microsoft.com/)
 
----
-
-## Features
-
-- 🖥️ **Echtes Vollbild ohne Leisten:** Keine Fensterrahmen, keine Windows-Taskleiste, randlos maximiert.
-- 🧙‍♂️ **Ersteinrichtungs-Assistent (Setup Wizard):** Beim Erststart öffnet sich automatisch ein Dialog zur Eingabe der Dashboard-URL, PIN und Autostart-Option.
-- 🔒 **PIN-geschütztes Einstellungsmenü:**
-  - **Maus-Shortcut 1:** **Scrollrad-Klick (mittlere Maustaste)** an beliebiger Stelle auf dem Bildschirm.
-  - **Maus-Shortcut 2:** Schneller **3-fach-Klick** mit links in die **obere linke Bildschirmecke**.
-  - **Touch-Geste:** Halte die **obere linke Bildschirmecke für 3 Sekunden** gedrückt.
-  - **Tastatur-Kürzel:** `F2` oder `Strg + Umschalt + S`.
-  - Im Menü können URL, PIN, Standby-Zeiten, Mauszeiger-Verhalten und Autostart angepasst werden. Ebenso gibt es Buttons für Cache-Leerung, Neuladen und ordentliches Beenden.
-- 🌙 **Hybrid-Standby & Wake-on-Touch:**
-  - Stufe 1: Nach $X$ Minuten Inaktivität schaltet sich ein pechschwarzer Vollbild-Schoner ein (sofortiges Wake-on-Touch ohne Signalverlust oder HDMI-Verzögerung).
-  - Stufe 2: Optional nach $Y$ Minuten Hardware-Standby des Bildschirms via Win32 DPMS.
-  - Verhindert unkontrolliertes Windows-Einschlafen (`SetThreadExecutionState`).
-- 🔄 **Verbindungs-Watchdog:** Bei Boot-Verzögerungen oder Server-Neustarts zeigt die App einen Ladebildschirm und versucht alle 5 Sekunden automatisch die Wiederverbindung.
-- 🖱️ **Mauszeiger-Verhalten:** Wählbar zwischen Auto-Hide (Mauszeiger verschwindet nach 3 Sekunden Inaktivität) und dauerhafter Sichtbarkeit (für Desktop-/Maus-Betrieb).
-- 🚫 **Kiosk-Schutz:** Deaktiviert Kontextmenüs (Rechtsklick) und Pinch/Mausrad-Zoom.
-- 🔊 **Auto-Permissions:** Genehmigt Audio-Autoplay, Kamera und Mikrofon ohne Bestätigungs-Popups.
-- 🚀 **Autostart-Verwaltung:** Kann sich selbst in den Windows-Autostart (`HKCU\...\Run`) eintragen oder austragen.
+A lightweight, performant, and robust fullscreen kiosk application for Windows built with **C# / .NET 8 WPF** and **Microsoft Edge WebView2**. Specially designed for wall-mounted touchscreens, smart tablets, and home automation terminals (such as the Neo Deck Dashboard).
 
 ---
 
-## Projekt kompilieren & veröffentlichen
+## ✨ Features
 
-Führe das Skript `build.ps1` in PowerShell aus:
+- 🖥️ **True Borderless Fullscreen:** No window borders, no Windows taskbar, perfectly maximized for embedded displays.
+- 🧙‍♂️ **First-Run Setup Wizard:** On first launch, a friendly wizard automatically guides you through entering your dashboard URL, setting a security PIN, and configuring autostart.
+- 🔒 **PIN-Protected Settings Menu:**
+  - **Mouse Shortcut 1:** **Middle mouse click (scroll wheel)** anywhere on the screen.
+  - **Mouse Shortcut 2:** Quick **triple left-click** in the **top-left corner**.
+  - **Touch Gesture:** Press and hold the **top-left corner for 3 seconds**.
+  - **Keyboard Shortcut:** `F2` or `Ctrl + Shift + S`.
+  - The settings dialog allows changing the dashboard URL, PIN, standby timers, cursor visibility mode, and autostart. Also includes quick actions to reload, clear web cache, or cleanly exit.
+- 🌙 **Hybrid Standby & Instant Wake-on-Touch:**
+  - **Stage 1 (Blackout Saver):** After $X$ minutes of user inactivity, a pitch-black fullscreen overlay appears. The screen immediately wakes on the slightest touch or movement without any HDMI reconnect lag or video sync delays.
+  - **Stage 2 (Hardware Standby):** Optionally powers down the monitor via Win32 DPMS after $Y$ minutes.
+  - Keeps Windows awake and prevents uncontrolled OS sleep (`SetThreadExecutionState`).
+- 🔄 **Connection Watchdog & Auto-Reconnect:** If the dashboard server reboots or network drops, a neat loading screen is displayed with automatic retry every 5 seconds.
+- 🖱️ **Configurable Mouse Cursor Behavior:** Switch between auto-hiding the cursor after 3 seconds of inactivity (ideal for wall touchscreens) or keeping it permanently visible (for mouse/desktop use).
+- 🚫 **Kiosk Protection:** Disables unwanted browser context menus (right-click) and pinch/scroll-wheel zoom gestures.
+- 🔊 **Auto-Granted Permissions:** Silently grants permissions for audio autoplay, webcam, and microphone without intrusive prompt popups.
+- 🚀 **Windows Autostart Integration:** Easily enable or disable autostart with Windows via `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
 
+---
+
+## 📥 Installation
+
+### Option 1: Installer (Recommended)
+Download **`SmartHomeKiosk-Setup.exe`** from the [Latest Releases](https://github.com/Daddelgreis74/smarthome-kiosk-windows/releases/latest).
+
+The setup wizard features:
+- Dual installation mode (install for current user or all users / administrative).
+- Automatic detection and installation of Microsoft Edge WebView2 Evergreen Runtime if missing.
+- Option to create a desktop shortcut and enable launch on Windows startup.
+- Clean uninstallation via Windows *Apps & Features*.
+
+### Option 2: Portable Executable
+Download **`SmartHomeKiosk.exe`** from the [Latest Releases](https://github.com/Daddelgreis74/smarthome-kiosk-windows/releases/latest) and run it anywhere without installation.
+
+---
+
+## 🛠️ Building from Source
+
+### Prerequisites
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Inno Setup 6](https://jrsoftware.org/isinfo.php) (optional, only needed for creating the installer)
+- PowerShell 5.1 or PowerShell 7+
+
+### 1. Build Portable Single-File Executable
 ```powershell
 .\build.ps1
 ```
+The output will be generated in `.\publish\SmartHomeKiosk.exe`.
 
-Das Skript erzeugt eine einzige, eigenständige `.exe`-Datei:
-```text
-.\publish\SmartHomeKiosk.exe
-```
-
----
-
-## 📦 Installationsassistent erstellen (Setup.exe)
-
-Führe das Skript `build-installer.ps1` aus, um die fertige Installationsdatei zu erzeugen:
-
+### 2. Build Inno Setup Installer
 ```powershell
 .\installer\build-installer.ps1
 ```
-
-Der Installer wird im Ordner `dist\` abgelegt:
-```text
-.\dist\SmartHomeKiosk-Setup.exe
-```
-
-**Was der Installer bietet:**
-- 🖼️ **Eigenes Setup-Icon:** Trägt das offizielle Dashboard-Logo.
-- 👤 **Dual-Mode:** Kann ohne Admin-Rechte nur für den aktuellen Benutzer oder mit Admin-Rechten für alle Benutzer installiert werden.
-- 📦 **Offline WebView2-Bundle:** Enthält den Evergreen Bootstrapper von Microsoft und installiert fehlende Laufzeitbibliotheken vollautomatisch.
-- 🚀 **Desktop-Symbol & Autostart:** Kann direkt im Setup als Aufgabe ausgewählt werden.
-- 🧹 **Saubere Deinstallation:** Eintrag in Windows *„Apps & Features“* mit optionaler Entfernung aller Benutzerdaten und Caches.
+The installer will be generated in `.\dist\SmartHomeKiosk-Setup.exe`.
 
 ---
 
-## Konfiguration (`appsettings.json`)
+## ⚙️ Configuration (`appsettings.json`)
 
-Die Einstellungen werden in `%APPDATA%\SmartHomeKiosk\appsettings.json` gespeichert:
+Settings are stored in `%APPDATA%\SmartHomeKiosk\appsettings.json`:
 
 ```json
 {
   "IsConfigured": true,
-  "DashboardUrl": "http://192.168.178.100:3000",
+  "DashboardUrl": "https://192.168.178.100:8443",
   "PinCode": "1234",
   "AutoStartEnabled": true,
   "IsHybridStandbyEnabled": true,
@@ -82,3 +87,9 @@ Die Einstellungen werden in `%APPDATA%\SmartHomeKiosk\appsettings.json` gespeich
   "AutoApprovePermissions": true
 }
 ```
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
