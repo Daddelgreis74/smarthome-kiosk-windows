@@ -1,4 +1,4 @@
-﻿# SmartHome Kiosk (Windows)
+# SmartHome Kiosk (Windows)
 
 [![Release Build](https://github.com/Daddelgreis74/smarthome-kiosk-windows/actions/workflows/release.yml/badge.svg)](https://github.com/Daddelgreis74/smarthome-kiosk-windows/actions/workflows/release.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/Daddelgreis74/smarthome-kiosk-windows)](https://github.com/Daddelgreis74/smarthome-kiosk-windows/releases/latest)
@@ -44,6 +44,31 @@ The setup wizard features:
 
 ### Option 2: Portable Executable
 Download **`SmartHomeKiosk.exe`** from the [Latest Releases](https://github.com/Daddelgreis74/smarthome-kiosk-windows/releases/latest) and run it anywhere without installation.
+
+---
+
+## 🛡️ Windows 11 Security & Smart App Control (Troubleshooting)
+
+Because this is an open-source project without an expensive corporate EV code-signing certificate, Windows security features might flag or block the installer on some devices:
+
+### 1. "Error 1551: An application control policy has blocked this file" (Smart App Control)
+On Windows 11 tablets and newer PCs, Microsoft's **Smart App Control (SAC)** is enabled by default. It automatically blocks all unsigned open-source binaries without an override button:
+- **How to resolve:**
+  1. Open the Windows Start menu and search for **Windows Security** (*Windows-Sicherheit*).
+  2. Navigate to **App & browser control** (*App- und Browsersteuerung*).
+  3. Click on **Smart App Control settings** (*Einstellungen für die intelligente App-Steuerung*).
+  4. Set the toggle to **Off** (*Aus*).
+  *(Note: Windows Defender real-time antivirus protection remains fully active).*
+
+### 2. Windows SmartScreen ("Windows protected your PC")
+- Click on **More info** (*Weitere Informationen*).
+- Click on **Run anyway** (*Trotzdem ausführen*).
+
+### 3. Unblocking Downloaded Files (Mark of the Web)
+If Windows marks downloaded files from the browser as restricted:
+- Right-click (or long press on touchscreen) `SmartHomeKiosk-Setup.exe` > **Properties** (*Eigenschaften*).
+- At the bottom of the *General* tab, check the **Unblock** (*Zulassen*) box.
+- Click **Apply** and **OK**.
 
 ---
 
