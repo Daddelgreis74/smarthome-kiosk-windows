@@ -1,5 +1,5 @@
 #define MyAppName "SmartHome Kiosk"
-#define MyAppVersion "1.0.4"
+#define MyAppVersion "1.0.5"
 #define MyAppPublisher "SmartHome"
 #define MyAppExeName "SmartHomeKiosk.exe"
 

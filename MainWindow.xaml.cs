@@ -112,26 +112,70 @@ namespace SmartHomeKiosk
             Loaded += MainWindow_Loaded;
         }
 
-        private void OnUpdateAvailable(UpdateInfo info)
+        private async void OnUpdateAvailable(UpdateInfo info)
         {
-            Dispatcher.Invoke(() =>
+            await Dispatcher.InvokeAsync(async () =>
             {
-                KioskUpdateDot.Visibility = Visibility.Visible;
-                BtnKioskSettings.ToolTip = $"Kiosk-Einstellungen (Neues Update {info.TagName} verfügbar!)";
+                await InjectKioskButtonAsync();
             });
         }
 
-        private void BtnKioskSettings_Click(object sender, RoutedEventArgs e)
+        private async Task InjectKioskButtonAsync()
         {
-            ResetActivity();
-            OpenSettings();
-        }
+            if (KioskBrowser.CoreWebView2 == null) return;
+            try
+            {
+                bool hasUpdate = UpdateService.LatestUpdateInfo != null;
+                string updateDotScript = hasUpdate ? @"
+                    if (!document.getElementById('kiosk-update-dot')) {
+                        const dot = document.createElement('div');
+                        dot.id = 'kiosk-update-dot';
+                        dot.style.cssText = 'position:absolute !important;top:-2px !important;right:-2px !important;width:12px !important;height:12px !important;border-radius:6px !important;background:#38BDF8 !important;border:2px solid #0F172A !important;box-shadow:0 0 8px #38BDF8 !important;pointer-events:none !important;';
+                        btn.appendChild(dot);
+                        btn.title = 'Kiosk-Einstellungen (Neues Update verfügbar!)';
+                    }
+                " : "";
 
-        private void BtnKioskSettings_PreviewTouchDown(object sender, TouchEventArgs e)
-        {
-            e.Handled = true;
-            ResetActivity();
-            OpenSettings();
+                string script = $@"
+                    (function() {{
+                        if (document.getElementById('kiosk-settings-btn')) return;
+                        if (!document.body) return;
+
+                        const btn = document.createElement('div');
+                        btn.id = 'kiosk-settings-btn';
+                        btn.innerHTML = '⚙️';
+                        btn.title = 'Kiosk-Einstellungen (PIN erforderlich)';
+                        btn.style.cssText = 'position:fixed !important;bottom:16px !important;right:16px !important;width:44px !important;height:44px !important;border-radius:22px !important;background:rgba(15,23,42,0.85) !important;border:1.5px solid rgba(56,189,248,0.4) !important;color:#fff !important;display:flex !important;align-items:center !important;justify-content:center !important;font-size:22px !important;cursor:pointer !important;z-index:2147483647 !important;opacity:0.40 !important;transition:opacity 0.2s,border-color 0.2s,transform 0.1s !important;user-select:none !important;-webkit-user-select:none !important;touch-action:manipulation !important;box-shadow:0 4px 16px rgba(0,0,0,0.6) !important;';
+
+                        btn.addEventListener('mouseenter', function() {{
+                            btn.style.opacity = '1';
+                            btn.style.borderColor = '#00F2FE';
+                        }});
+                        btn.addEventListener('mouseleave', function() {{
+                            btn.style.opacity = '0.40';
+                            btn.style.borderColor = 'rgba(56,189,248,0.4)';
+                        }});
+                        btn.addEventListener('click', function(e) {{
+                            e.stopPropagation();
+                            e.preventDefault();
+                            btn.style.transform = 'scale(0.92)';
+                            setTimeout(function() {{ btn.style.transform = 'scale(1)'; }}, 150);
+                            window.chrome.webview.postMessage('open_settings');
+                        }});
+                        btn.addEventListener('touchend', function(e) {{
+                            e.stopPropagation();
+                            e.preventDefault();
+                            window.chrome.webview.postMessage('open_settings');
+                        }});
+
+                        {updateDotScript}
+
+                        document.body.appendChild(btn);
+                    }})();
+                ";
+                await KioskBrowser.CoreWebView2.ExecuteScriptAsync(script);
+            }
+            catch { }
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -183,14 +227,61 @@ namespace SmartHomeKiosk
                     };
                 }
 
-                // Script Injection fuer Mausrad-Klick (Middle Click) im Browser
+                // Script Injection: Mausrad-Klick & Kiosk-Settings Button im DOM
                 await KioskBrowser.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
-                    window.addEventListener('mousedown', function(e) {
-                        if (e.button === 1) { // Mittlere Maustaste
-                            window.chrome.webview.postMessage('open_settings');
+                    (function() {
+                        // 1. Middle-Click
+                        window.addEventListener('mousedown', function(e) {
+                            if (e.button === 1) {
+                                window.chrome.webview.postMessage('open_settings');
+                            }
+                        }, true);
+
+                        // 2. Kiosk-Button injizieren
+                        function injectBtn() {
+                            if (document.getElementById('kiosk-settings-btn')) return;
+                            if (!document.body) {
+                                setTimeout(injectBtn, 100);
+                                return;
+                            }
+                            const btn = document.createElement('div');
+                            btn.id = 'kiosk-settings-btn';
+                            btn.innerHTML = '⚙️';
+                            btn.title = 'Kiosk-Einstellungen (PIN erforderlich)';
+                            btn.style.cssText = 'position:fixed !important;bottom:16px !important;right:16px !important;width:44px !important;height:44px !important;border-radius:22px !important;background:rgba(15,23,42,0.85) !important;border:1.5px solid rgba(56,189,248,0.4) !important;color:#fff !important;display:flex !important;align-items:center !important;justify-content:center !important;font-size:22px !important;cursor:pointer !important;z-index:2147483647 !important;opacity:0.40 !important;transition:opacity 0.2s,border-color 0.2s,transform 0.1s !important;user-select:none !important;-webkit-user-select:none !important;touch-action:manipulation !important;box-shadow:0 4px 16px rgba(0,0,0,0.6) !important;';
+
+                            btn.addEventListener('mouseenter', function() {
+                                btn.style.opacity = '1';
+                                btn.style.borderColor = '#00F2FE';
+                            });
+                            btn.addEventListener('mouseleave', function() {
+                                btn.style.opacity = '0.40';
+                                btn.style.borderColor = 'rgba(56,189,248,0.4)';
+                            });
+                            btn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                btn.style.transform = 'scale(0.92)';
+                                setTimeout(function() { btn.style.transform = 'scale(1)'; }, 150);
+                                window.chrome.webview.postMessage('open_settings');
+                            });
+                            btn.addEventListener('touchend', function(e) {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                window.chrome.webview.postMessage('open_settings');
+                            });
+
+                            document.body.appendChild(btn);
                         }
-                    }, true);
+
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', injectBtn);
+                        } else {
+                            injectBtn();
+                        }
+                    })();
                 ");
+
                 KioskBrowser.CoreWebView2.WebMessageReceived += (s, args) =>
                 {
                     try
@@ -198,19 +289,26 @@ namespace SmartHomeKiosk
                         string msg = args.TryGetWebMessageAsString();
                         if (msg == "open_settings")
                         {
-                            Dispatcher.Invoke(OpenSettings);
+                            Dispatcher.Invoke(() =>
+                            {
+                                ResetActivity();
+                                OpenSettings();
+                            });
                         }
                     }
                     catch { }
                 };
 
                 // Navigations-Ereignisse
-                KioskBrowser.CoreWebView2.NavigationCompleted += (s, args) =>
+                KioskBrowser.CoreWebView2.NavigationCompleted += async (s, args) =>
                 {
                     if (args.IsSuccess)
                     {
                         WatchdogOverlay.Visibility = Visibility.Collapsed;
                         _retryTimer.Stop();
+
+                        // Kiosk-Button & Update-Dot sicherstellen
+                        await InjectKioskButtonAsync();
                     }
                     else
                     {

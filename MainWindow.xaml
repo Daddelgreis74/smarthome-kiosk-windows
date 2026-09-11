@@ -34,46 +34,6 @@
             </StackPanel>
         </Grid>
 
-        <!-- Layer 2: Dezenter Kiosk-Einstellungsbutton (Unten rechts) -->
-        <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,16,16">
-            <Button x:Name="BtnKioskSettings"
-                    Width="40" Height="40"
-                    Cursor="Hand"
-                    Click="BtnKioskSettings_Click"
-                    PreviewTouchDown="BtnKioskSettings_PreviewTouchDown"
-                    ToolTip="Kiosk-Einstellungen (PIN erforderlich)">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="BtnBorder" 
-                                Width="40" Height="40" CornerRadius="20"
-                                Background="#B30F172A" BorderBrush="#334155" BorderThickness="1.5"
-                                Opacity="0.30">
-                            <TextBlock Text="⚙️" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="BtnBorder" Property="Opacity" Value="0.90"/>
-                                <Setter TargetName="BtnBorder" Property="BorderBrush" Value="#00F2FE"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="BtnBorder" Property="Opacity" Value="1.0"/>
-                                <Setter TargetName="BtnBorder" Property="Background" Value="#1E293B"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-
-            <!-- Update-Indikator (Leuchtender Punkt direkt am Zahnrad) -->
-            <Border x:Name="KioskUpdateDot"
-                    Width="12" Height="12" CornerRadius="6"
-                    Background="#38BDF8" BorderBrush="#0F172A" BorderThickness="2"
-                    HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Margin="0,-2,-2,0"
-                    Visibility="Collapsed"
-                    IsHitTestVisible="False"/>
-        </Grid>
-
         <!-- Layer 3: Schwarzer Vollbild-Schoner (Dimming / Software-Standby) -->
         <Grid x:Name="ScreenSaverOverlay" Background="Black" Visibility="Collapsed"
               PreviewMouseDown="ScreenSaver_PreviewMouseDown"
