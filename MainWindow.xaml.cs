@@ -24,10 +24,6 @@ namespace SmartHomeKiosk
         private readonly MouseHookService _mouseHook;
         private bool _isSettingsOpen = false;
 
-        // Edge-Swipe Geste (vom linken Bildschirmrand nach rechts)
-        private Point? _swipeStartPoint;
-        private bool _isEdgeSwiping;
-
         public MainWindow(KioskConfig config)
         {
             InitializeComponent();
@@ -120,12 +116,18 @@ namespace SmartHomeKiosk
         {
             Dispatcher.Invoke(() =>
             {
-                UpdateBadge.Visibility = Visibility.Visible;
-                UpdateBadge.ToolTip = $"Neues Kiosk-Update {info.TagName} verfügbar!\nAntippen zum Installieren.";
+                KioskUpdateDot.Visibility = Visibility.Visible;
+                BtnKioskSettings.ToolTip = $"Kiosk-Einstellungen (Neues Update {info.TagName} verfügbar!)";
             });
         }
 
-        private void UpdateBadge_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void BtnKioskSettings_Click(object sender, RoutedEventArgs e)
+        {
+            ResetActivity();
+            OpenSettings();
+        }
+
+        private void BtnKioskSettings_PreviewTouchDown(object sender, TouchEventArgs e)
         {
             e.Handled = true;
             ResetActivity();
@@ -305,85 +307,6 @@ namespace SmartHomeKiosk
         private void ScreenSaver_PreviewMouseDown(object sender, MouseButtonEventArgs e) => ResetActivity();
         private void ScreenSaver_PreviewTouchDown(object sender, TouchEventArgs e) => ResetActivity();
 
-        // Edge-Swipe Methoden (vom linken Rand nach rechts)
-        private void StartEdgeSwipe(Point pt)
-        {
-            _swipeStartPoint = pt;
-            _isEdgeSwiping = true;
-        }
-
-        private void CheckEdgeSwipe(Point currentPt)
-        {
-            if (!_isEdgeSwiping || _swipeStartPoint == null) return;
-
-            double deltaX = currentPt.X - _swipeStartPoint.Value.X;
-            double deltaY = Math.Abs(currentPt.Y - _swipeStartPoint.Value.Y);
-
-            // Geste: Von links nach rechts mind. 85px wischen, max. 120px vertikale Abweichung
-            if (deltaX >= 85 && deltaY <= 120)
-            {
-                CancelEdgeSwipe();
-                OpenSettings();
-            }
-        }
-
-        private void CancelEdgeSwipe()
-        {
-            _isEdgeSwiping = false;
-            _swipeStartPoint = null;
-            try
-            {
-                LeftEdgeSwipeZone.ReleaseMouseCapture();
-                LeftEdgeSwipeZone.ReleaseAllTouchCaptures();
-            }
-            catch { }
-        }
-
-        // Linke Edge-Swipe Handlers
-        private void EdgeSwipe_PreviewTouchDown(object sender, TouchEventArgs e)
-        {
-            ResetActivity();
-            var touch = e.GetTouchPoint(this);
-            StartEdgeSwipe(touch.Position);
-            try { LeftEdgeSwipeZone.CaptureTouch(e.TouchDevice); } catch { }
-        }
-
-        private void EdgeSwipe_PreviewTouchMove(object sender, TouchEventArgs e)
-        {
-            ResetActivity();
-            var touch = e.GetTouchPoint(this);
-            CheckEdgeSwipe(touch.Position);
-        }
-
-        private void EdgeSwipe_PreviewTouchUp(object sender, TouchEventArgs e)
-        {
-            CancelEdgeSwipe();
-        }
-
-        private void EdgeSwipe_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            ResetActivity();
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                StartEdgeSwipe(e.GetPosition(this));
-                try { LeftEdgeSwipeZone.CaptureMouse(); } catch { }
-            }
-        }
-
-        private void EdgeSwipe_PreviewMouseMove(object sender, MouseEventArgs e)
-        {
-            ResetActivity();
-            if (_isEdgeSwiping && e.LeftButton == MouseButtonState.Pressed)
-            {
-                CheckEdgeSwipe(e.GetPosition(this));
-            }
-        }
-
-        private void EdgeSwipe_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            CancelEdgeSwipe();
-        }
-
         // Tastenkombinationen (z. B. Notfall F2 oder Strg+Shift+S)
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
@@ -400,7 +323,6 @@ namespace SmartHomeKiosk
             if (_isSettingsOpen) return;
             _isSettingsOpen = true;
 
-            CancelEdgeSwipe();
             _cursorHideTimer.Stop();
             _inactivityCheckTimer.Stop();
             _cornerClickResetTimer.Stop();

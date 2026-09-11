@@ -14,9 +14,9 @@ A lightweight, performant, and robust fullscreen kiosk application for Windows b
 - 🖥️ **True Borderless Fullscreen:** No window borders, no Windows taskbar, perfectly maximized for embedded displays.
 - 🧙‍♂️ **First-Run Setup Wizard:** On first launch, a friendly wizard automatically guides you through entering your dashboard URL, setting a security PIN, and configuring autostart.
 - 🔒 **PIN-Protected Settings Menu:**
+  - **Touch Access:** Discreet, translucent ⚙️ button in the **bottom-right corner** of the screen (tap to open PIN prompt; displays a glowing cyan indicator dot when an update is available).
   - **Mouse Shortcut 1:** **Middle mouse click (scroll wheel)** anywhere on the screen.
   - **Mouse Shortcut 2:** Quick **triple left-click** in the **top-left corner**.
-  - **Touch Gesture (Edge-Swipe):** Swipe from the **left edge of the screen inwards** (swipe from the outer left border ~85 px to the right).
   - **Keyboard Shortcut:** `F2` or `Ctrl + Shift + S`.
   - The settings dialog allows changing the dashboard URL, PIN, standby timers, cursor visibility mode, and autostart. Also includes quick actions to reload, clear web cache, or cleanly exit.
 - 🌙 **Hybrid Standby & Instant Wake-on-Touch:**
