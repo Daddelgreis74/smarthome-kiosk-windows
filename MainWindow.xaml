@@ -34,15 +34,17 @@
             </StackPanel>
         </Grid>
 
-        <!-- Layer 2: Geheime Touch-Ecke (Oben links, 100x100 Pixel, unsichtbar) -->
-        <Border x:Name="SecretTouchCorner" 
-                Width="100" Height="100" 
-                HorizontalAlignment="Left" VerticalAlignment="Top" 
+        <!-- Layer 2: Linke Edge-Swipe-Zone (30 Pixel breit, gesamte Bildschirmhöhe, transparent) -->
+        <Border x:Name="LeftEdgeSwipeZone" 
+                Width="30" 
+                HorizontalAlignment="Left" VerticalAlignment="Stretch" 
                 Background="Transparent"
-                PreviewTouchDown="SecretCorner_PreviewTouchDown"
-                PreviewTouchUp="SecretCorner_PreviewTouchUp"
-                PreviewMouseDown="SecretCorner_PreviewMouseDown"
-                PreviewMouseUp="SecretCorner_PreviewMouseUp"/>
+                PreviewTouchDown="EdgeSwipe_PreviewTouchDown"
+                PreviewTouchMove="EdgeSwipe_PreviewTouchMove"
+                PreviewTouchUp="EdgeSwipe_PreviewTouchUp"
+                PreviewMouseDown="EdgeSwipe_PreviewMouseDown"
+                PreviewMouseMove="EdgeSwipe_PreviewMouseMove"
+                PreviewMouseUp="EdgeSwipe_PreviewMouseUp"/>
 
         <!-- Layer 2.5: Dezenter Update-Hinweis (oben links neben der geheimen Zone) -->
         <Border x:Name="UpdateBadge"

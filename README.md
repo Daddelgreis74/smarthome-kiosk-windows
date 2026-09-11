@@ -16,7 +16,7 @@ A lightweight, performant, and robust fullscreen kiosk application for Windows b
 - 🔒 **PIN-Protected Settings Menu:**
   - **Mouse Shortcut 1:** **Middle mouse click (scroll wheel)** anywhere on the screen.
   - **Mouse Shortcut 2:** Quick **triple left-click** in the **top-left corner**.
-  - **Touch Gesture:** Press and hold the **top-left corner for 3 seconds**.
+  - **Touch Gesture (Edge-Swipe):** Swipe from the **left edge of the screen inwards** (swipe from the outer left border ~85 px to the right).
   - **Keyboard Shortcut:** `F2` or `Ctrl + Shift + S`.
   - The settings dialog allows changing the dashboard URL, PIN, standby timers, cursor visibility mode, and autostart. Also includes quick actions to reload, clear web cache, or cleanly exit.
 - 🌙 **Hybrid Standby & Instant Wake-on-Touch:**

@@ -19,12 +19,14 @@ namespace SmartHomeKiosk
         private readonly DispatcherTimer _inactivityCheckTimer;
         private readonly DispatcherTimer _cursorHideTimer;
         private readonly DispatcherTimer _retryTimer;
-        private readonly DispatcherTimer _secretGestureTimer;
-
-        private int _cornerClickCount = 0;
         private readonly DispatcherTimer _cornerClickResetTimer;
+        private int _cornerClickCount = 0;
         private readonly MouseHookService _mouseHook;
         private bool _isSettingsOpen = false;
+
+        // Edge-Swipe Geste (vom linken Bildschirmrand nach rechts)
+        private Point? _swipeStartPoint;
+        private bool _isEdgeSwiping;
 
         public MainWindow(KioskConfig config)
         {
@@ -61,15 +63,7 @@ namespace SmartHomeKiosk
                 }
             };
 
-            // 4. Geheime Touch-Geste (3 Sekunden halten oben links)
-            _secretGestureTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
-            _secretGestureTimer.Tick += (s, e) =>
-            {
-                _secretGestureTimer.Stop();
-                OpenSettings();
-            };
-
-            // 5. Dreifach-Klick Timer für linke obere Ecke
+            // 4. Dreifach-Klick Timer für linke obere Ecke (Maus-Shortcut)
             _cornerClickResetTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(750) };
             _cornerClickResetTimer.Tick += (s, e) =>
             {
@@ -96,20 +90,12 @@ namespace SmartHomeKiosk
                         {
                             _cornerClickCount = 0;
                             _cornerClickResetTimer.Stop();
-                            _secretGestureTimer.Stop();
                             OpenSettings();
                             return;
                         }
-
-                        _secretGestureTimer.Stop();
-                        _secretGestureTimer.Start();
                     }
                 }
                 catch { }
-            };
-            _mouseHook.LeftMouseUpDetected += () =>
-            {
-                _secretGestureTimer.Stop();
             };
 
             Closing += (s, e) =>
@@ -319,33 +305,84 @@ namespace SmartHomeKiosk
         private void ScreenSaver_PreviewMouseDown(object sender, MouseButtonEventArgs e) => ResetActivity();
         private void ScreenSaver_PreviewTouchDown(object sender, TouchEventArgs e) => ResetActivity();
 
-        // Geheime Ecke Handlers (Oben links)
-        private void SecretCorner_PreviewTouchDown(object sender, TouchEventArgs e) => _secretGestureTimer.Start();
-        private void SecretCorner_PreviewTouchUp(object sender, TouchEventArgs e) => _secretGestureTimer.Stop();
-        
-        private void SecretCorner_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        // Edge-Swipe Methoden (vom linken Rand nach rechts)
+        private void StartEdgeSwipe(Point pt)
         {
-            if (e.ChangedButton == MouseButton.Left)
+            _swipeStartPoint = pt;
+            _isEdgeSwiping = true;
+        }
+
+        private void CheckEdgeSwipe(Point currentPt)
+        {
+            if (!_isEdgeSwiping || _swipeStartPoint == null) return;
+
+            double deltaX = currentPt.X - _swipeStartPoint.Value.X;
+            double deltaY = Math.Abs(currentPt.Y - _swipeStartPoint.Value.Y);
+
+            // Geste: Von links nach rechts mind. 85px wischen, max. 120px vertikale Abweichung
+            if (deltaX >= 85 && deltaY <= 120)
             {
-                _cornerClickCount++;
-                _cornerClickResetTimer.Stop();
-                _cornerClickResetTimer.Start();
-
-                if (_cornerClickCount >= 3)
-                {
-                    _cornerClickCount = 0;
-                    _cornerClickResetTimer.Stop();
-                    _secretGestureTimer.Stop();
-                    OpenSettings();
-                    e.Handled = true;
-                    return;
-                }
-
-                _secretGestureTimer.Start();
+                CancelEdgeSwipe();
+                OpenSettings();
             }
         }
 
-        private void SecretCorner_PreviewMouseUp(object sender, MouseButtonEventArgs e) => _secretGestureTimer.Stop();
+        private void CancelEdgeSwipe()
+        {
+            _isEdgeSwiping = false;
+            _swipeStartPoint = null;
+            try
+            {
+                LeftEdgeSwipeZone.ReleaseMouseCapture();
+                LeftEdgeSwipeZone.ReleaseAllTouchCaptures();
+            }
+            catch { }
+        }
+
+        // Linke Edge-Swipe Handlers
+        private void EdgeSwipe_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            ResetActivity();
+            var touch = e.GetTouchPoint(this);
+            StartEdgeSwipe(touch.Position);
+            try { LeftEdgeSwipeZone.CaptureTouch(e.TouchDevice); } catch { }
+        }
+
+        private void EdgeSwipe_PreviewTouchMove(object sender, TouchEventArgs e)
+        {
+            ResetActivity();
+            var touch = e.GetTouchPoint(this);
+            CheckEdgeSwipe(touch.Position);
+        }
+
+        private void EdgeSwipe_PreviewTouchUp(object sender, TouchEventArgs e)
+        {
+            CancelEdgeSwipe();
+        }
+
+        private void EdgeSwipe_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            ResetActivity();
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                StartEdgeSwipe(e.GetPosition(this));
+                try { LeftEdgeSwipeZone.CaptureMouse(); } catch { }
+            }
+        }
+
+        private void EdgeSwipe_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            ResetActivity();
+            if (_isEdgeSwiping && e.LeftButton == MouseButtonState.Pressed)
+            {
+                CheckEdgeSwipe(e.GetPosition(this));
+            }
+        }
+
+        private void EdgeSwipe_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            CancelEdgeSwipe();
+        }
 
         // Tastenkombinationen (z. B. Notfall F2 oder Strg+Shift+S)
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -363,9 +400,9 @@ namespace SmartHomeKiosk
             if (_isSettingsOpen) return;
             _isSettingsOpen = true;
 
+            CancelEdgeSwipe();
             _cursorHideTimer.Stop();
             _inactivityCheckTimer.Stop();
-            _secretGestureTimer.Stop();
             _cornerClickResetTimer.Stop();
             _cornerClickCount = 0;
             Mouse.OverrideCursor = null;
