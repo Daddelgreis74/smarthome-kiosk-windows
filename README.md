@@ -25,8 +25,8 @@ A lightweight, performant, and robust fullscreen kiosk application for Windows b
   - Keeps Windows awake and prevents uncontrolled OS sleep (`SetThreadExecutionState`).
 - 🔄 **Connection Watchdog & Auto-Reconnect:** If the dashboard server reboots or network drops, a neat loading screen is displayed with automatic retry every 5 seconds.
 - 🖱️ **Configurable Mouse Cursor Behavior:** Switch between auto-hiding the cursor after 3 seconds of inactivity (ideal for wall touchscreens) or keeping it permanently visible (for mouse/desktop use).
-- 🚫 **Kiosk Protection:** Disables unwanted browser context menus (right-click) and pinch/scroll-wheel zoom gestures.
 - 🔊 **Auto-Granted Permissions:** Silently grants permissions for audio autoplay, webcam, and microphone without intrusive prompt popups.
+- 🔄 **In-App Auto-Updates (GitHub Releases):** Automatically checks for updates on startup and every 24 hours, displays a discreet update badge on the dashboard when a new release is available, and provides seamless 1-click silent update installation directly in the settings menu with changelog display.
 - 🚀 **Windows Autostart Integration:** Easily enable or disable autostart with Windows via `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
 
 ---

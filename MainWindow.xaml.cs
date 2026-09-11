@@ -123,7 +123,27 @@ namespace SmartHomeKiosk
                 File.AppendAllText(Path.Combine(dir, "startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] MainWindow Closed!\n");
             };
 
+            // 7. Update-Service initialisieren & Hintergrund-Prüfung alle 24h starten
+            UpdateService.UpdateAvailable += OnUpdateAvailable;
+            UpdateService.StartPeriodicChecks(TimeSpan.FromSeconds(8), TimeSpan.FromHours(24));
+
             Loaded += MainWindow_Loaded;
+        }
+
+        private void OnUpdateAvailable(UpdateInfo info)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                UpdateBadge.Visibility = Visibility.Visible;
+                UpdateBadge.ToolTip = $"Neues Kiosk-Update {info.TagName} verfügbar!\nAntippen zum Installieren.";
+            });
+        }
+
+        private void UpdateBadge_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            ResetActivity();
+            OpenSettings();
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)

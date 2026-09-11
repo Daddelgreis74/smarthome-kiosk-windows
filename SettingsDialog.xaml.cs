@@ -31,6 +31,12 @@ namespace SmartHomeKiosk
             ChkAutoHideCursor.IsChecked = _config.AutoHideCursor;
             ChkAutoStart.IsChecked = _config.AutoStartEnabled;
 
+            TxtCurrentVersion.Text = $"v{UpdateService.CurrentVersion.ToString(3)}";
+            if (UpdateService.LatestUpdateInfo != null)
+            {
+                DisplayUpdateInfo(UpdateService.LatestUpdateInfo);
+            }
+
             Loaded += (s, e) => PbPin.Focus();
         }
 
@@ -94,6 +100,88 @@ namespace SmartHomeKiosk
 
             DialogResult = true;
             Close();
+        }
+
+        private void DisplayUpdateInfo(UpdateInfo info)
+        {
+            TxtUpdateStatus.Text = $"Neues Update {info.TagName} verfügbar!";
+            TxtUpdateStatus.Foreground = (System.Windows.Media.Brush)FindResource("AccentCyan");
+
+            TxtNewVersionTitle.Text = $"Neues Update {info.TagName}: {info.Title}";
+            TxtChangelog.Text = string.IsNullOrWhiteSpace(info.Changelog) ? "Keine Release-Notes vorhanden." : info.Changelog;
+            UpdateAvailablePanel.Visibility = Visibility.Visible;
+        }
+
+        private async void BtnCheckUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            BtnCheckUpdate.IsEnabled = false;
+            TxtUpdateStatus.Text = "Prüfe auf Updates...";
+            TxtUpdateStatus.Foreground = (System.Windows.Media.Brush)FindResource("TextSecondary");
+
+            try
+            {
+                var result = await UpdateService.CheckForUpdatesAsync();
+                if (result.IsUpdateAvailable && result.Info != null)
+                {
+                    DisplayUpdateInfo(result.Info);
+                }
+                else if (result.ErrorMessage != null)
+                {
+                    TxtUpdateStatus.Text = $"Fehler: {result.ErrorMessage}";
+                    TxtUpdateStatus.Foreground = (System.Windows.Media.Brush)FindResource("TextDanger");
+                }
+                else
+                {
+                    TxtUpdateStatus.Text = "Status: Sie verwenden bereits die neueste Version.";
+                    TxtUpdateStatus.Foreground = (System.Windows.Media.Brush)FindResource("TextSecondary");
+                    UpdateAvailablePanel.Visibility = Visibility.Collapsed;
+                }
+            }
+            finally
+            {
+                BtnCheckUpdate.IsEnabled = true;
+            }
+        }
+
+        private async void BtnInstallUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            var info = UpdateService.LatestUpdateInfo;
+            if (info == null) return;
+
+            var confirm = MessageBox.Show(
+                $"Möchtest du das Update {info.TagName} jetzt herunterladen und installieren?\n\nDie Kiosk-App wird für die Aktualisierung kurz geschlossen und startet anschließend automatisch neu.",
+                "Kiosk-Update installieren",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirm != MessageBoxResult.Yes) return;
+
+            BtnInstallUpdate.IsEnabled = false;
+            BtnCheckUpdate.IsEnabled = false;
+            UpdateProgressBar.Visibility = Visibility.Visible;
+            TxtDownloadProgress.Visibility = Visibility.Visible;
+            UpdateProgressBar.Value = 0;
+            TxtDownloadProgress.Text = "Download wird gestartet...";
+
+            var progress = new Progress<int>(pct =>
+            {
+                UpdateProgressBar.Value = pct;
+                TxtDownloadProgress.Text = $"Herunterladen... {pct}%";
+            });
+
+            try
+            {
+                using var cts = new System.Threading.CancellationTokenSource();
+                await UpdateService.DownloadAndInstallAsync(info, progress, cts.Token);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler beim Herunterladen oder Installieren des Updates:\n\n{ex.Message}", "Update-Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                BtnInstallUpdate.IsEnabled = true;
+                BtnCheckUpdate.IsEnabled = true;
+                UpdateProgressBar.Visibility = Visibility.Collapsed;
+                TxtDownloadProgress.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void BtnReload_Click(object sender, RoutedEventArgs e)

@@ -44,6 +44,19 @@
                 PreviewMouseDown="SecretCorner_PreviewMouseDown"
                 PreviewMouseUp="SecretCorner_PreviewMouseUp"/>
 
+        <!-- Layer 2.5: Dezenter Update-Hinweis (oben links neben der geheimen Zone) -->
+        <Border x:Name="UpdateBadge"
+                Width="32" Height="32" CornerRadius="16"
+                Background="#B30F172A" BorderBrush="#38BDF8" BorderThickness="1.5"
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                Margin="110,12,0,0"
+                Visibility="Collapsed"
+                Cursor="Hand"
+                PreviewMouseDown="UpdateBadge_PreviewMouseDown"
+                ToolTip="Neues Update verfügbar! Antippen zum Installieren.">
+            <TextBlock Text="🚀" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+
         <!-- Layer 3: Schwarzer Vollbild-Schoner (Dimming / Software-Standby) -->
         <Grid x:Name="ScreenSaverOverlay" Background="Black" Visibility="Collapsed"
               PreviewMouseDown="ScreenSaver_PreviewMouseDown"
